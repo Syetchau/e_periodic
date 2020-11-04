@@ -22,6 +22,7 @@ class PopupAreaDialogState extends State<PopupAreaDialog> {
   List<Fnc_AreaResult> areaNameList = List<Fnc_AreaResult>();
   List<Fnc_AreaResult> checkedList = List<Fnc_AreaResult>();
   List<String> displayTextList = List<String>();
+  bool isClickedOkArea = false;
 
   @override
   void initState() {
@@ -177,6 +178,7 @@ class PopupAreaDialogState extends State<PopupAreaDialog> {
               Text(Common.cancel, style: TextStyle(color: Colors.greenAccent)),
           onPressed: () {
             notifyParent();
+            isClickedOkArea = false;
             Navigator.pop(context);
           },
         ),
@@ -187,8 +189,8 @@ class PopupAreaDialogState extends State<PopupAreaDialog> {
           ),
           onPressed: () {
             notifyParent();
+            isClickedOkArea = true;
             Navigator.pop(context);
-            //TODO: filter result
           },
         ),
       ],
