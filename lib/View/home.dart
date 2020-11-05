@@ -440,26 +440,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   color: Colors.grey,
                 ),
                 Expanded(
-                  child: ListView(
+                  child: SingleChildScrollView(
                     controller: scrollController,
-                    children: [
-                      if (selectedIndex == 0 && combinedList.isNotEmpty)
-                        _buildTaskScheduleList(combinedList),
-                      if (selectedIndex == 1 && pendingList.isNotEmpty)
-                        _buildTaskScheduleList(pendingList),
-                      if (selectedIndex == 4 && completedList.isNotEmpty)
-                        _buildTaskScheduleList(completedList),
-                      Visibility(
-                        visible: _setNoResultView(),
-                        child: Container(
-                          height: 130,
-                          alignment: Alignment.bottomCenter,
-                          child: Text(Common.noTask,
-                              style: TextStyle(
-                                  color: Colors.black54, fontSize: 14)),
-                        ),
-                      ),
-                    ],
+                    child: _setBuildWidget(),
                   ),
                 )
               ],
@@ -479,6 +462,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
+  Widget _setBuildWidget() {
+    if (selectedIndex == 0 && combinedList.isNotEmpty)
+      return _buildTaskScheduleList(combinedList);
+    else if (selectedIndex == 1 && pendingList.isNotEmpty)
+      return _buildTaskScheduleList(pendingList);
+    else if (selectedIndex == 4 && completedList.isNotEmpty)
+      return _buildTaskScheduleList(completedList);
+    else{
+      return _noResultView();
+    }
+  }
+
+  Widget _noResultView() {
+    return Container(
+      alignment: Alignment.bottomCenter,
+      height: 130,
+      child: Text(Common.noTask,
+          style: TextStyle(color: Colors.black54, fontSize: 14)),
+    );
+  }
+
   Widget _buildTaskScheduleList(List<Fnc_TaskScheduleSummaryResult> list) {
     return GroupedListView<Fnc_TaskScheduleSummaryResult, DateTime>(
       shrinkWrap: true,
@@ -495,85 +499,85 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   fontWeight: FontWeight.bold))),
       indexedItemBuilder:
           (context, Fnc_TaskScheduleSummaryResult element, index) =>
-              GestureDetector(
-        onTap: () {
-          Navigator.of(context)
-              .push(MaterialPageRoute(
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(
                   builder: (context) => TaskScheduleDetailPage(
-                        taskName: list[index].taskName,
-                        area: list[index].area,
-                        pjsn: list[index].pjsn,
-                        arsn: list[index].arsn,
-                        startDate: list[index].planningDate.toDouble(),
-                        endDate: list[index].scheduleDate.toDouble(),
-                        tasksn: list[index].tasksn,
-                        taskcgsn: list[index].taskcgsn,
-                      )))
-              .then((value) => _refresh());
-        },
-        child: Container(
-            margin: const EdgeInsets.only(
-                left: 10, right: 10, top: 5.0, bottom: 5.0),
-            padding: const EdgeInsets.only(top: 5.0, bottom: 5.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.all(Radius.circular(5.0)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 3,
-                  blurRadius: 5,
-                  offset: Offset(0, 3), // changes position of shadow
-                ),
-              ],
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Visibility(
-                  visible: _setRedCircleIconType(list[index]),
-                  child: Container(
-                    margin: const EdgeInsets.only(left: 10.0),
-                    child:
-                        Icon(Icons.circle, size: 24.0, color: Colors.redAccent),
-                  ),
-                ),
-                Visibility(
-                  visible: _setGreenCheckIconType(list[index]),
-                  child: Container(
-                    margin: const EdgeInsets.only(left: 10.0),
-                    child: Icon(Icons.check, size: 24.0, color: Colors.green),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.only(left: 10.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          child: Text(
-                            '${list[index].taskName.trim()}',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(top: 3.0),
-                          child: Text(
-                            '${list[index].area.trim()}',
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        )
-                      ],
+                    taskName: list[index].taskName,
+                    area: list[index].area,
+                    pjsn: list[index].pjsn,
+                    arsn: list[index].arsn,
+                    startDate: list[index].planningDate.toDouble(),
+                    endDate: list[index].scheduleDate.toDouble(),
+                    tasksn: list[index].tasksn,
+                    taskcgsn: list[index].taskcgsn,
+                  )))
+                  .then((value) => _refresh());
+            },
+            child: Container(
+                margin: const EdgeInsets.only(
+                    left: 10, right: 10, top: 5.0, bottom: 5.0),
+                padding: const EdgeInsets.only(top: 5.0, bottom: 5.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 3,
+                      blurRadius: 5,
+                      offset: Offset(0, 3), // changes position of shadow
                     ),
-                  ),
-                )
-              ],
-            )),
-      ),
+                  ],
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Visibility(
+                      visible: _setRedCircleIconType(list[index]),
+                      child: Container(
+                        margin: const EdgeInsets.only(left: 10.0),
+                        child:
+                        Icon(Icons.circle, size: 24.0, color: Colors.redAccent),
+                      ),
+                    ),
+                    Visibility(
+                      visible: _setGreenCheckIconType(list[index]),
+                      child: Container(
+                        margin: const EdgeInsets.only(left: 10.0),
+                        child: Icon(Icons.check, size: 24.0, color: Colors.green),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        margin: const EdgeInsets.only(left: 10.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              child: Text(
+                                '${list[index].taskName.trim()}',
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ),
+                            Container(
+                              margin: const EdgeInsets.only(top: 3.0),
+                              child: Text(
+                                '${list[index].area.trim()}',
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                )),
+          ),
       itemComparator: (item1, item2) =>
           item1.taskName.compareTo(item2.taskName),
       useStickyGroupSeparators: true,
@@ -581,6 +585,120 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       order: GroupedListOrder.ASC,
     );
   }
+
+  // Widget _buildTaskScheduleList(List<Fnc_TaskScheduleSummaryResult> list) {
+  //   return ListView.builder(
+  //     controller: scrollController,
+  //     itemCount: list.length,
+  //     itemBuilder: (BuildContext context, int index) {
+  //       if(list.length != 0){
+  //         return Column(
+  //           children: [
+  //             Container(
+  //                 alignment: Alignment.topLeft,
+  //                 margin:
+  //                 const EdgeInsets.only(left: 10.0, right: 10.0, top: 5.0),
+  //                 child: Text(
+  //                     DateFormat.yMMMEd().format(Common().convertFromOADate(
+  //                         list[index].planningDate.toDouble())),
+  //                     style: TextStyle(
+  //                         color: Colors.black87,
+  //                         fontSize: 15.0,
+  //                         fontWeight: FontWeight.bold))),
+  //             ListView.builder(
+  //               shrinkWrap: true,
+  //               physics: ClampingScrollPhysics(),
+  //               itemCount: list.length,
+  //               itemBuilder: (context, index) => GestureDetector(
+  //                 onTap: () {
+  //                   Navigator.of(context)
+  //                       .push(MaterialPageRoute(
+  //                       builder: (context) => TaskScheduleDetailPage(
+  //                         taskName: list[index].taskName,
+  //                         area:  list[index].area,
+  //                         pjsn:  list[index].pjsn,
+  //                         arsn:  list[index].arsn,
+  //                         startDate:  list[index].planningDate.toDouble(),
+  //                         endDate:  list[index].scheduleDate.toDouble(),
+  //                         tasksn:  list[index].tasksn,
+  //                         taskcgsn:  list[index].taskcgsn,
+  //                       )))
+  //                       .then((value) => _refresh());
+  //                 },
+  //                 child: Container(
+  //                     margin: const EdgeInsets.only(
+  //                         left: 10, right: 10, top: 5.0, bottom: 5.0),
+  //                     padding: const EdgeInsets.only(top: 5.0, bottom: 5.0),
+  //                     decoration: BoxDecoration(
+  //                       color: Colors.white,
+  //                       borderRadius: BorderRadius.all(Radius.circular(5.0)),
+  //                       boxShadow: [
+  //                         BoxShadow(
+  //                           color: Colors.grey.withOpacity(0.5),
+  //                           spreadRadius: 3,
+  //                           blurRadius: 5,
+  //                           offset: Offset(0, 3), // changes position of shadow
+  //                         ),
+  //                       ],
+  //                     ),
+  //                     child: Row(
+  //                       crossAxisAlignment: CrossAxisAlignment.center,
+  //                       children: [
+  //                         Visibility(
+  //                           visible: _setRedCircleIconType(list[index]),
+  //                           child: Container(
+  //                             margin: const EdgeInsets.only(left: 10.0),
+  //                             child: Icon(Icons.circle,
+  //                                 size: 24.0, color: Colors.redAccent),
+  //                           ),
+  //                         ),
+  //                         Visibility(
+  //                           visible: _setGreenCheckIconType(list[index]),
+  //                           child: Container(
+  //                             margin: const EdgeInsets.only(left: 10.0),
+  //                             child: Icon(Icons.check,
+  //                                 size: 24.0, color: Colors.green),
+  //                           ),
+  //                         ),
+  //                         Expanded(
+  //                           child: Container(
+  //                             margin: const EdgeInsets.only(left: 10.0),
+  //                             child: Column(
+  //                               crossAxisAlignment: CrossAxisAlignment.start,
+  //                               mainAxisSize: MainAxisSize.min,
+  //                               children: [
+  //                                 Container(
+  //                                   child: Text(
+  //                                     '${ list[index].taskName.trim()}',
+  //                                     style: TextStyle(color: Colors.black),
+  //                                   ),
+  //                                 ),
+  //                                 Container(
+  //                                   margin: const EdgeInsets.only(top: 3.0),
+  //                                   child: Text(
+  //                                     '${list[index].area.trim()}',
+  //                                     style: TextStyle(
+  //                                         color: Colors.black,
+  //                                         fontWeight: FontWeight.bold),
+  //                                   ),
+  //                                 )
+  //                               ],
+  //                             ),
+  //                           ),
+  //                         )
+  //                       ],
+  //                     )),
+  //               ),
+  //             ),
+  //           ],
+  //         );
+  //       }
+  //       else{
+  //         return _noResultView();
+  //       }
+  //     },
+  //   );
+  // }
 
   Widget _buildChips() {
     List<Widget> chips = new List();
@@ -683,6 +801,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         combinedList.clear();
         completedList.clear();
         pendingList.clear();
+        _scrollToTop();
         _getTotalList(convertedTimeStamp);
       }
     });
@@ -714,60 +833,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         }).then((value) => updateTextFieldTask());
   }
 
-  Future<void> _logout() async {
-    SPHelper.remove(SPHelper.userInfo);
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (BuildContext ctx) => LoginPage()));
-  }
-
-  updateTextFieldArea() {
-    setState(() {
-      if (areaKey.currentState.checkBoxParentArea.getIsCheckParent() == true) {
-        areaController.text = Common.all;
-        if(areaKey.currentState.isClickedOkArea){
-          _getTotalList(convertedTimeStamp);
-        }
-      } else {
-        List<String> displayList = areaKey.currentState.displayTextList;
-        if (displayList.length != 0) {
-          String finalString = displayList.reduce((value, element) {
-            return value + " ," + element;
-          });
-          areaController.text = finalString;
-        } else {
-          areaController.text = "";
-          if(areaKey.currentState.isClickedOkArea){
-            combinedList.clear();
-          }
-        }
-      }
-    });
-  }
-
-  updateTextFieldTask() {
-    setState(() {
-      if (taskKey.currentState.checkBoxParentTask.getIsCheckParent() == true) {
-        taskController.text = Common.all;
-        if(taskKey.currentState.isClickedOkTask){
-          _getTotalList(convertedTimeStamp);
-        }
-      } else {
-        List<String> displayList = taskKey.currentState.displayTextList;
-        if (displayList.length != 0) {
-          String finalString = displayList.reduce((value, element) {
-            return value + " ," + element;
-          });
-          taskController.text = finalString;
-        } else {
-          taskController.text = "";
-          if(taskKey.currentState.isClickedOkTask){
-            combinedList.clear();
-          }
-        }
-      }
-    });
-  }
-
   bool _setRedCircleIconType(
       Fnc_TaskScheduleSummaryResult taskScheduleSummaryList) {
     // pending = cancel + completed - show green
@@ -794,27 +859,52 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
-  bool _setNoResultView() {
-    if (selectedIndex == 0 && combinedList.isNotEmpty) {
-      return false;
-    } else if (selectedIndex == 0 && combinedList.isEmpty) {
-      return true;
-    } else if (selectedIndex == 1 && pendingList.isNotEmpty) {
-      return false;
-    } else if (selectedIndex == 1 && pendingList.isEmpty) {
-      return true;
-    } else if (selectedIndex == 4 && completedList.isNotEmpty) {
-      return false;
-    } else if (selectedIndex == 4 && completedList.isEmpty) {
-      return true;
-    } else {
-      return true;
-    }
+  updateTextFieldArea() {
+    setState(() {
+      if (areaKey.currentState.checkBoxParentArea.getIsCheckParent() == true) {
+        areaController.text = Common.all;
+        if (areaKey.currentState.isClickedOkArea) {
+          _getTotalList(convertedTimeStamp);
+        }
+      } else {
+        List<String> displayList = areaKey.currentState.displayTextList;
+        if (displayList.length != 0) {
+          String finalString = displayList.reduce((value, element) {
+            return value + " ," + element;
+          });
+          areaController.text = finalString;
+        } else {
+          areaController.text = "";
+          if (areaKey.currentState.isClickedOkArea) {
+            combinedList.clear();
+          }
+        }
+      }
+    });
   }
 
-  _refresh() {
-    _scrollToTop();
-    _getTotalList(convertedTimeStamp);
+  updateTextFieldTask() {
+    setState(() {
+      if (taskKey.currentState.checkBoxParentTask.getIsCheckParent() == true) {
+        taskController.text = Common.all;
+        if (taskKey.currentState.isClickedOkTask) {
+          _getTotalList(convertedTimeStamp);
+        }
+      } else {
+        List<String> displayList = taskKey.currentState.displayTextList;
+        if (displayList.length != 0) {
+          String finalString = displayList.reduce((value, element) {
+            return value + " ," + element;
+          });
+          taskController.text = finalString;
+        } else {
+          taskController.text = "";
+          if (taskKey.currentState.isClickedOkTask) {
+            combinedList.clear();
+          }
+        }
+      }
+    });
   }
 
   void _getPendingOrCompletedList(
@@ -840,5 +930,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void _scrollToTop() {
     scrollController.animateTo(0,
         duration: Duration(milliseconds: 500), curve: Curves.fastOutSlowIn);
+  }
+
+  void _refresh() {
+    _scrollToTop();
+    // _getTotalList(convertedTimeStamp);
+  }
+
+  Future<void> _logout() async {
+    SPHelper.remove(SPHelper.userInfo);
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (BuildContext ctx) => LoginPage()));
   }
 }
