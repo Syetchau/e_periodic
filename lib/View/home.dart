@@ -55,6 +55,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   DateTime selectedDate;
   double convertedTimeStamp;
   bool isLoading = true;
+  bool isFilteringTask = false;
   List<String> _options = [
     "ALL",
     "PENDING",
@@ -225,7 +226,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
 
     isLoading = false;
-    setState(() {});
+    if (selectedIndex == 1 || selectedIndex == 4) {
+      _getPendingOrCompletedList(combinedList);
+    }
+    if (isFilteringTask != true) {
+      setState(() {});
+    }
   }
 
   @override
@@ -469,7 +475,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       return _buildTaskScheduleList(pendingList);
     else if (selectedIndex == 4 && completedList.isNotEmpty)
       return _buildTaskScheduleList(completedList);
-    else{
+    else {
       return _noResultView();
     }
   }
@@ -499,85 +505,85 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   fontWeight: FontWeight.bold))),
       indexedItemBuilder:
           (context, Fnc_TaskScheduleSummaryResult element, index) =>
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(
+              GestureDetector(
+        onTap: () {
+          Navigator.of(context)
+              .push(MaterialPageRoute(
                   builder: (context) => TaskScheduleDetailPage(
-                    taskName: list[index].taskName,
-                    area: list[index].area,
-                    pjsn: list[index].pjsn,
-                    arsn: list[index].arsn,
-                    startDate: list[index].planningDate.toDouble(),
-                    endDate: list[index].scheduleDate.toDouble(),
-                    tasksn: list[index].tasksn,
-                    taskcgsn: list[index].taskcgsn,
-                  )))
-                  .then((value) => _refresh());
-            },
-            child: Container(
-                margin: const EdgeInsets.only(
-                    left: 10, right: 10, top: 5.0, bottom: 5.0),
-                padding: const EdgeInsets.only(top: 5.0, bottom: 5.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 3,
-                      blurRadius: 5,
-                      offset: Offset(0, 3), // changes position of shadow
-                    ),
-                  ],
+                        taskName: list[index].taskName,
+                        area: list[index].area,
+                        pjsn: list[index].pjsn,
+                        arsn: list[index].arsn,
+                        startDate: list[index].planningDate.toDouble(),
+                        endDate: list[index].scheduleDate.toDouble(),
+                        tasksn: list[index].tasksn,
+                        taskcgsn: list[index].taskcgsn,
+                      )))
+              .then((value) => _refresh());
+        },
+        child: Container(
+            margin: const EdgeInsets.only(
+                left: 10, right: 10, top: 5.0, bottom: 5.0),
+            padding: const EdgeInsets.only(top: 5.0, bottom: 5.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.all(Radius.circular(5.0)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 3,
+                  blurRadius: 5,
+                  offset: Offset(0, 3), // changes position of shadow
                 ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Visibility(
-                      visible: _setRedCircleIconType(list[index]),
-                      child: Container(
-                        margin: const EdgeInsets.only(left: 10.0),
-                        child:
+              ],
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Visibility(
+                  visible: _setRedCircleIconType(list[index]),
+                  child: Container(
+                    margin: const EdgeInsets.only(left: 10.0),
+                    child:
                         Icon(Icons.circle, size: 24.0, color: Colors.redAccent),
-                      ),
-                    ),
-                    Visibility(
-                      visible: _setGreenCheckIconType(list[index]),
-                      child: Container(
-                        margin: const EdgeInsets.only(left: 10.0),
-                        child: Icon(Icons.check, size: 24.0, color: Colors.green),
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        margin: const EdgeInsets.only(left: 10.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              child: Text(
-                                '${list[index].taskName.trim()}',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                            Container(
-                              margin: const EdgeInsets.only(top: 3.0),
-                              child: Text(
-                                '${list[index].area.trim()}',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            )
-                          ],
+                  ),
+                ),
+                Visibility(
+                  visible: _setGreenCheckIconType(list[index]),
+                  child: Container(
+                    margin: const EdgeInsets.only(left: 10.0),
+                    child: Icon(Icons.check, size: 24.0, color: Colors.green),
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.only(left: 10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          child: Text(
+                            '${list[index].taskName.trim()}',
+                            style: TextStyle(color: Colors.black),
+                          ),
                         ),
-                      ),
-                    )
-                  ],
-                )),
-          ),
+                        Container(
+                          margin: const EdgeInsets.only(top: 3.0),
+                          child: Text(
+                            '${list[index].area.trim()}',
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            )),
+      ),
       itemComparator: (item1, item2) =>
           item1.taskName.compareTo(item2.taskName),
       useStickyGroupSeparators: true,
@@ -802,6 +808,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         completedList.clear();
         pendingList.clear();
         _scrollToTop();
+
         _getTotalList(convertedTimeStamp);
       }
     });
@@ -888,19 +895,74 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       if (taskKey.currentState.checkBoxParentTask.getIsCheckParent() == true) {
         taskController.text = Common.all;
         if (taskKey.currentState.isClickedOkTask) {
-          _getTotalList(convertedTimeStamp);
+          if (selectedIndex == 0) {
+            _getTotalList(convertedTimeStamp);
+          } else if (selectedIndex == 1 || selectedIndex == 4) {
+            _getPendingOrCompletedList(combinedList);
+          }
         }
       } else {
         List<String> displayList = taskKey.currentState.displayTextList;
+        List<Fnc_TaskScheduleSummaryResult> list =
+            List<Fnc_TaskScheduleSummaryResult>();
+        list.clear();
+        isFilteringTask = true;
         if (displayList.length != 0) {
           String finalString = displayList.reduce((value, element) {
             return value + " ," + element;
           });
+          _getTotalList(convertedTimeStamp);
+          if (selectedIndex == 1 || selectedIndex == 4) {
+            _getPendingOrCompletedList(combinedList);
+          }
+          if (selectedIndex == 0) {
+            for (int i = 0; i < combinedList.length; i++) {
+              for (int j = 0; j < displayList.length; j++) {
+                if (combinedList[i].taskName == displayList[j]) {
+                    list.add(combinedList[i]);
+                }
+              }
+            }
+          } else if(selectedIndex == 1){
+            for (int i = 0; i < pendingList.length; i++) {
+              for (int j = 0; j < displayList.length; j++) {
+                if (pendingList[i].taskName == displayList[j]) {
+                  list.add(pendingList[i]);
+                }
+              }
+            }
+          } else if(selectedIndex == 4){
+            for (int i = 0; i < completedList.length; i++) {
+              for (int j = 0; j < displayList.length; j++) {
+                if (completedList[i].taskName == displayList[j]) {
+                  list.add(completedList[i]);
+                }
+              }
+            }
+          }
+          combinedList.clear();
+          pendingList.clear();
+          completedList.clear();
+          if (selectedIndex == 0) {
+            combinedList = list;
+          } else if (selectedIndex == 1) {
+            pendingList = list;
+          } else if (selectedIndex == 4) {
+            completedList = list;
+          }
           taskController.text = finalString;
+          _scrollToTop();
         } else {
-          taskController.text = "";
           if (taskKey.currentState.isClickedOkTask) {
-            combinedList.clear();
+            if (selectedIndex == 0) {
+              combinedList.clear();
+            } else if (selectedIndex == 1) {
+              pendingList.clear();
+            } else if (selectedIndex == 4) {
+              completedList.clear();
+            }
+            isFilteringTask = false;
+            taskController.text = "";
           }
         }
       }
@@ -925,6 +987,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       }
     }
     _scrollToTop();
+    if (isFilteringTask != true) {
+      setState(() {});
+    }
   }
 
   void _scrollToTop() {
