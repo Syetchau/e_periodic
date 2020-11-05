@@ -40,6 +40,7 @@ dev_dependencies:
   intl: ^0.16.1
   collection: ^1.14.13
   grouped_list: ^3.5.0
+  progress_dialog: ^1.2.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -19,7 +19,6 @@ import 'dart:io' show Platform;
 
 import 'CustomMonthlyPicker.dart';
 import 'PopupAreaDialog.dart';
-import 'package:collection/collection.dart';
 import 'package:grouped_list/grouped_list.dart';
 
 class HomePage extends StatefulWidget {
@@ -48,12 +47,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   TextEditingController calendarController = TextEditingController();
   TextEditingController areaController = TextEditingController();
   TextEditingController taskController = TextEditingController();
+  ScrollController scrollController = ScrollController();
   GlobalKey<PopupAreaDialogState> areaKey = GlobalKey();
   GlobalKey<PopupTaskDialogState> taskKey = GlobalKey();
   String projectName = "";
   int selectedIndex;
   DateTime selectedDate;
   double convertedTimeStamp;
+  bool isLoading = true;
   List<String> _options = [
     "ALL",
     "PENDING",
@@ -81,8 +82,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     calendarController.dispose();
     areaController.dispose();
     taskController.dispose();
-    areaList.clear();
-    taskList.clear();
+    scrollController.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
   }
 
   void _getConvertedMicrosoftTimeStamp() {
@@ -100,15 +105,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Future<void> _getProjectTitle() async {
     await ApiProvider().getHTTPResponse(Common.projectListURL).then(
         (response) async {
-      setState(() {
-        if (response.statusCode == 200) {
-          ProjectList project = new ProjectList();
-          project = ProjectList.fromJson(json.decode(response.body));
-          projectName = project.fncProjectListResult[0].projectName;
-        } else {
-          throw Exception(response.statusCode);
-        }
-      });
+      if (response.statusCode == 200) {
+        ProjectList project = new ProjectList();
+        project = ProjectList.fromJson(json.decode(response.body));
+        projectName = project.fncProjectListResult[0].projectName;
+      } else {
+        throw Exception(response.statusCode);
+      }
     }, onError: (error) {
       log('callProjectListError : $error');
     });
@@ -119,16 +122,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     await ApiProvider()
         .getHTTPResponse(Common.areaListURL + "_pjsn=${user.pjsn}")
         .then((response) async {
-      setState(() {
-        if (response.statusCode == 200) {
-          Area area = new Area();
-          area = Area.fromJson(json.decode(response.body));
-          areaList = area.fncAreaResult;
-          areaList.sort((a, b) => a.area.compareTo(b.area));
-        } else {
-          throw Exception(response.statusCode);
-        }
-      });
+      if (response.statusCode == 200) {
+        Area area = new Area();
+        area = Area.fromJson(json.decode(response.body));
+        areaList = area.fncAreaResult;
+        areaList.sort((a, b) => a.area.compareTo(b.area));
+      } else {
+        throw Exception(response.statusCode);
+      }
     }, onError: (error) {
       log('callAreaListError : $error');
     });
@@ -139,16 +140,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     await ApiProvider()
         .getHTTPResponse(Common.taskListURL + "_pjsn=${user.pjsn}")
         .then((response) async {
-      setState(() {
-        if (response.statusCode == 200) {
-          Task task = new Task();
-          task = Task.fromJson(json.decode(response.body));
-          taskList = task.fncTaskListResult;
-          taskList.sort((a, b) => a.taskName.compareTo(b.taskName));
-        } else {
-          throw Exception(response.statusCode);
-        }
-      });
+      if (response.statusCode == 200) {
+        Task task = new Task();
+        task = Task.fromJson(json.decode(response.body));
+        taskList = task.fncTaskListResult;
+        taskList.sort((a, b) => a.taskName.compareTo(b.taskName));
+      } else {
+        throw Exception(response.statusCode);
+      }
     }, onError: (error) {
       log('callTaskListError : $error');
     });
@@ -163,17 +162,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         "&_taskcgsn=${0}";
 
     await ApiProvider().getHTTPResponse(scheduleURL).then((response) async {
-      setState(() {
-        if (response.statusCode == 200) {
-          TaskScheduleSummary taskScheduleSummary = new TaskScheduleSummary();
-          taskScheduleSummary =
-              TaskScheduleSummary.fromJson(json.decode(response.body));
-          taskScheduleSummaryList =
-              taskScheduleSummary.fncTaskScheduleSummaryResult;
-        } else {
-          throw Exception(response.statusCode);
-        }
-      });
+      if (response.statusCode == 200) {
+        TaskScheduleSummary taskScheduleSummary = new TaskScheduleSummary();
+        taskScheduleSummary =
+            TaskScheduleSummary.fromJson(json.decode(response.body));
+        taskScheduleSummaryList =
+            taskScheduleSummary.fncTaskScheduleSummaryResult;
+      } else {
+        throw Exception(response.statusCode);
+      }
     }, onError: (error) {
       log('callTaskScheduleSummaryListError : $error');
     });
@@ -189,31 +186,32 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     await ApiProvider().getHTTPResponse(itemTaskScheduleURL).then(
         (response) async {
-      setState(() {
-        if (response.statusCode == 200) {
-          TaskScheduleSummary taskScheduleSummary = new TaskScheduleSummary();
-          taskScheduleSummary =
-              TaskScheduleSummary.fromJson2(json.decode(response.body));
-          itemScheduleList = taskScheduleSummary.fncTaskScheduleSummaryResult;
-        } else {
-          throw Exception(response.statusCode);
-        }
-      });
+      if (response.statusCode == 200) {
+        TaskScheduleSummary taskScheduleSummary = new TaskScheduleSummary();
+        taskScheduleSummary =
+            TaskScheduleSummary.fromJson2(json.decode(response.body));
+        itemScheduleList = taskScheduleSummary.fncTaskScheduleSummaryResult;
+      } else {
+        throw Exception(response.statusCode);
+      }
     }, onError: (error) {
       log('callTaskScheduleSummaryListError : $error');
     });
   }
 
   Future<void> _getTotalList(convertedTimeStamp) async {
+    // wait these two APIs call first
     await _getTaskScheduleSummaryList(convertedTimeStamp);
     await _getItemScheduleList(convertedTimeStamp);
+
     List<Fnc_TaskScheduleSummaryResult> taskList = taskScheduleSummaryList;
     List<Fnc_TaskScheduleSummaryResult> itemList = itemScheduleList;
     List<Fnc_TaskScheduleSummaryResult> totalList =
         List<Fnc_TaskScheduleSummaryResult>();
 
     if (itemList.length != 0 && taskList.length != 0) {
-      totalList = taskList..addAll(itemList);
+      totalList.addAll(taskList);
+      totalList.addAll(itemList);
       combinedList = totalList;
       combinedList.sort((a, b) => a.planningDate.compareTo(b.planningDate));
     } else if (itemList.length == 0) {
@@ -226,21 +224,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       combinedList.sort((a, b) => a.planningDate.compareTo(b.planningDate));
     }
 
-    List<Fnc_TaskScheduleSummaryResult> fullList =
-        List<Fnc_TaskScheduleSummaryResult>();
-    fullList.clear();
-    pendingList.clear();
-    completedList.clear();
-    fullList.addAll(combinedList);
-    for (int i = 0; i < fullList.length; i++) {
-      if (fullList[i].pending >= 1) {
-        pendingList.add(fullList[i]);
-        pendingList.sort((a, b) => a.planningDate.compareTo(b.planningDate));
-      } else if (fullList[i].pending == 0) {
-        completedList.add(fullList[i]);
-        completedList.sort((a, b) => a.planningDate.compareTo(b.planningDate));
-      }
-    }
+    isLoading = false;
+    setState(() {});
   }
 
   @override
@@ -456,7 +441,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
                 Expanded(
                   child: ListView(
+                    controller: scrollController,
                     children: [
+                      if (selectedIndex == 0 && combinedList.isNotEmpty)
+                        _buildTaskScheduleList(combinedList),
+                      if (selectedIndex == 1 && pendingList.isNotEmpty)
+                        _buildTaskScheduleList(pendingList),
+                      if (selectedIndex == 4 && completedList.isNotEmpty)
+                        _buildTaskScheduleList(completedList),
                       Visibility(
                         visible: _setNoResultView(),
                         child: Container(
@@ -467,17 +459,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   color: Colors.black54, fontSize: 14)),
                         ),
                       ),
-                      if (selectedIndex == 0 && combinedList.isNotEmpty)
-                        _buildTaskScheduleList(combinedList),
-                      if (selectedIndex == 1 && pendingList.isNotEmpty)
-                        _buildTaskScheduleList(pendingList),
-                      if (selectedIndex == 4 && completedList.isNotEmpty)
-                        _buildTaskScheduleList(completedList),
                     ],
                   ),
                 )
               ],
             ),
+            Visibility(
+              visible: isLoading,
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            )
           ],
         ),
       ),
@@ -536,8 +531,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Visibility(
-                  visible:
-                      _setRedCircleIconType(taskScheduleSummaryList[index]),
+                  visible: _setRedCircleIconType(list[index]),
                   child: Container(
                     margin: const EdgeInsets.only(left: 10.0),
                     child:
@@ -545,8 +539,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                 ),
                 Visibility(
-                  visible:
-                      _setGreenCheckIconType(taskScheduleSummaryList[index]),
+                  visible: _setGreenCheckIconType(list[index]),
                   child: Container(
                     margin: const EdgeInsets.only(left: 10.0),
                     child: Icon(Icons.check, size: 24.0, color: Colors.green),
@@ -561,14 +554,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       children: [
                         Container(
                           child: Text(
-                            '${taskScheduleSummaryList[index].taskName.trim()}',
+                            '${list[index].taskName.trim()}',
                             style: TextStyle(color: Colors.black),
                           ),
                         ),
                         Container(
                           margin: const EdgeInsets.only(top: 3.0),
                           child: Text(
-                            '${taskScheduleSummaryList[index].area.trim()}',
+                            '${list[index].area.trim()}',
                             style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold),
@@ -612,11 +605,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         backgroundColor: Colors.white,
         pressElevation: 1.0,
         onSelected: (bool selected) {
-          setState(() {
-            if (selected) {
+          if (selected) {
+            setState(() {
               selectedIndex = i;
-            }
-          });
+              _getPendingOrCompletedList(combinedList);
+            });
+          }
         },
       );
       chips.add(Padding(
@@ -678,17 +672,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             locale: Locale(_setLocaleForCalendar()))
         .then((date) {
       if (date != null) {
+        isLoading = true;
         selectedDate = date;
         calendarController.text = DateFormat.yMMM().format(date);
 
         // get selected month start from 1
         final firstDateOfSelectedMonth = DateTime.utc(date.year, date.month, 1);
         convertedTimeStamp = Common().convertToOADate(firstDateOfSelectedMonth);
-        print(convertedTimeStamp);
 
-        setState(() {
-          _getTotalList(convertedTimeStamp);
-        });
+        combinedList.clear();
+        completedList.clear();
+        pendingList.clear();
+        _getTotalList(convertedTimeStamp);
       }
     });
   }
@@ -806,8 +801,32 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   _refresh() {
-    setState(() {
-      _getTotalList(convertedTimeStamp);
-    });
+    _scrollToTop();
+    _getTotalList(convertedTimeStamp);
+  }
+
+  void _getPendingOrCompletedList(
+      List<Fnc_TaskScheduleSummaryResult> combinedList) {
+    List<Fnc_TaskScheduleSummaryResult> fullList =
+        List<Fnc_TaskScheduleSummaryResult>();
+    fullList.clear();
+    pendingList.clear();
+    completedList.clear();
+    fullList.addAll(combinedList);
+    for (int i = 0; i < fullList.length; i++) {
+      if (fullList[i].pending >= 1) {
+        pendingList.add(fullList[i]);
+        pendingList.sort((a, b) => a.planningDate.compareTo(b.planningDate));
+      } else if (fullList[i].pending == 0) {
+        completedList.add(fullList[i]);
+        completedList.sort((a, b) => a.planningDate.compareTo(b.planningDate));
+      }
+    }
+    _scrollToTop();
+  }
+
+  void _scrollToTop() {
+    scrollController.animateTo(0,
+        duration: Duration(milliseconds: 500), curve: Curves.fastOutSlowIn);
   }
 }
