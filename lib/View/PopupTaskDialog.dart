@@ -22,6 +22,7 @@ class PopupTaskDialogState extends State<PopupTaskDialog> {
   List<Fnc_TaskListResult> taskNameList = List<Fnc_TaskListResult>();
   List<Fnc_TaskListResult> checkedList = List<Fnc_TaskListResult>();
   List<String> displayTextList = List<String>();
+  bool isClickedOkTask = false;
 
   @override
   void initState() {
@@ -177,6 +178,7 @@ class PopupTaskDialogState extends State<PopupTaskDialog> {
               Text(Common.cancel, style: TextStyle(color: Colors.greenAccent)),
           onPressed: () {
             notifyParent();
+            isClickedOkTask = false;
             Navigator.pop(context);
           },
         ),
@@ -187,6 +189,7 @@ class PopupTaskDialogState extends State<PopupTaskDialog> {
           ),
           onPressed: () {
             notifyParent();
+            isClickedOkTask = true;
             Navigator.pop(context);
           },
         ),

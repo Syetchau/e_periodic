@@ -724,6 +724,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     setState(() {
       if (areaKey.currentState.checkBoxParentArea.getIsCheckParent() == true) {
         areaController.text = Common.all;
+        if(areaKey.currentState.isClickedOkArea){
+          _getTotalList(convertedTimeStamp);
+        }
       } else {
         List<String> displayList = areaKey.currentState.displayTextList;
         if (displayList.length != 0) {
@@ -733,6 +736,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           areaController.text = finalString;
         } else {
           areaController.text = "";
+          if(areaKey.currentState.isClickedOkArea){
+            combinedList.clear();
+          }
         }
       }
     });
@@ -742,6 +748,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     setState(() {
       if (taskKey.currentState.checkBoxParentTask.getIsCheckParent() == true) {
         taskController.text = Common.all;
+        if(taskKey.currentState.isClickedOkTask){
+          _getTotalList(convertedTimeStamp);
+        }
       } else {
         List<String> displayList = taskKey.currentState.displayTextList;
         if (displayList.length != 0) {
@@ -751,6 +760,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           taskController.text = finalString;
         } else {
           taskController.text = "";
+          if(taskKey.currentState.isClickedOkTask){
+            combinedList.clear();
+          }
         }
       }
     });
