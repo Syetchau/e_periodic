@@ -3,9 +3,12 @@ import 'dart:developer';
 
 import 'package:e_periodic/Common/Common.dart';
 import 'package:e_periodic/Model/Area.dart';
+import 'package:e_periodic/Model/CompletedList.dart';
+import 'package:e_periodic/Model/PendingList.dart';
 import 'package:e_periodic/Model/ProjectList.dart';
 import 'package:e_periodic/Model/Task.dart';
 import 'package:e_periodic/Model/TaskScheduleSummary.dart';
+import 'package:e_periodic/Model/TotalList.dart';
 import 'package:e_periodic/Model/User.dart';
 import 'package:e_periodic/Repo/ApiProvider.dart';
 import 'package:e_periodic/Repo/SPHelper.dart';
@@ -38,12 +41,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       List<Fnc_TaskScheduleSummaryResult>();
   List<Fnc_TaskScheduleSummaryResult> itemScheduleList =
       List<Fnc_TaskScheduleSummaryResult>();
-  List<Fnc_TaskScheduleSummaryResult> pendingList =
-      List<Fnc_TaskScheduleSummaryResult>();
-  List<Fnc_TaskScheduleSummaryResult> completedList =
-      List<Fnc_TaskScheduleSummaryResult>();
-  List<Fnc_TaskScheduleSummaryResult> combinedList =
-      List<Fnc_TaskScheduleSummaryResult>();
+  TotalList total = TotalList();
+  PendingList pending = PendingList();
+  CompletedList completed = CompletedList();
   TextEditingController calendarController = TextEditingController();
   TextEditingController areaController = TextEditingController();
   TextEditingController taskController = TextEditingController();
@@ -56,6 +56,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   double convertedTimeStamp;
   bool isLoading = true;
   bool isFilteringTask = false;
+  bool isClearList = false;
   List<String> _options = [
     "ALL",
     "PENDING",
@@ -209,27 +210,48 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     List<Fnc_TaskScheduleSummaryResult> itemList = itemScheduleList;
     List<Fnc_TaskScheduleSummaryResult> totalList =
         List<Fnc_TaskScheduleSummaryResult>();
+    List<Fnc_TaskScheduleSummaryResult> fullList =
+        List<Fnc_TaskScheduleSummaryResult>();
+    List<Fnc_TaskScheduleSummaryResult> pendingList =
+        List<Fnc_TaskScheduleSummaryResult>();
+    List<Fnc_TaskScheduleSummaryResult> completedList =
+        List<Fnc_TaskScheduleSummaryResult>();
 
     if (itemList.length != 0 && taskList.length != 0) {
       totalList.addAll(taskList);
       totalList.addAll(itemList);
-      combinedList = totalList;
-      combinedList.sort((a, b) => a.planningDate.compareTo(b.planningDate));
+      totalList.sort((a, b) => a.planningDate.compareTo(b.planningDate));
+      total.setTotalList(totalList);
     } else if (itemList.length == 0) {
       totalList = taskList;
-      combinedList = totalList;
-      combinedList.sort((a, b) => a.planningDate.compareTo(b.planningDate));
+      totalList.sort((a, b) => a.planningDate.compareTo(b.planningDate));
+      total.setTotalList(totalList);
     } else if (taskList.length == 0) {
       totalList = itemList;
-      combinedList = totalList;
-      combinedList.sort((a, b) => a.planningDate.compareTo(b.planningDate));
+      totalList.sort((a, b) => a.planningDate.compareTo(b.planningDate));
+      total.setTotalList(totalList);
+    }
+
+    fullList.clear();
+    pendingList.clear();
+    completedList.clear();
+    fullList.addAll(totalList);
+
+    for (int i = 0; i < fullList.length; i++) {
+      if (fullList[i].pending >= 1) {
+        pendingList.add(fullList[i]);
+        pendingList.sort((a, b) => a.planningDate.compareTo(b.planningDate));
+        pending.setPendingList(pendingList);
+      } else if (fullList[i].pending == 0) {
+        completedList.add(fullList[i]);
+        completedList.sort((a, b) => a.planningDate.compareTo(b.planningDate));
+        completed.setCompletedList(completedList);
+      }
     }
 
     isLoading = false;
-    if (selectedIndex == 1 || selectedIndex == 4) {
-      _getPendingOrCompletedList(combinedList);
-    }
-    if (isFilteringTask != true) {
+    _scrollToTop();
+    if (isFilteringTask != true || isClearList != false) {
       setState(() {});
     }
   }
@@ -469,12 +491,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _setBuildWidget() {
-    if (selectedIndex == 0 && combinedList.isNotEmpty)
-      return _buildTaskScheduleList(combinedList);
-    else if (selectedIndex == 1 && pendingList.isNotEmpty)
-      return _buildTaskScheduleList(pendingList);
-    else if (selectedIndex == 4 && completedList.isNotEmpty)
-      return _buildTaskScheduleList(completedList);
+    if (selectedIndex == 0 && total.totalList.isNotEmpty)
+      return _buildTaskScheduleList(total.getTotalList());
+    else if (selectedIndex == 1 && pending.pendingList.isNotEmpty)
+      return _buildTaskScheduleList(pending.getPendingList());
+    else if (selectedIndex == 4 && completed.completedList.isNotEmpty)
+      return _buildTaskScheduleList(completed.getCompletedList());
     else {
       return _noResultView();
     }
@@ -732,7 +754,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           if (selected) {
             setState(() {
               selectedIndex = i;
-              _getPendingOrCompletedList(combinedList);
+              _getTotalList(convertedTimeStamp);
             });
           }
         },
@@ -804,12 +826,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         final firstDateOfSelectedMonth = DateTime.utc(date.year, date.month, 1);
         convertedTimeStamp = Common().convertToOADate(firstDateOfSelectedMonth);
 
-        combinedList.clear();
-        completedList.clear();
-        pendingList.clear();
-        _scrollToTop();
+        total.totalList.clear();
+        completed.completedList.clear();
+        pending.pendingList.clear();
 
         _getTotalList(convertedTimeStamp);
+        _scrollToTop();
       }
     });
   }
@@ -883,113 +905,86 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         } else {
           areaController.text = "";
           if (areaKey.currentState.isClickedOkArea) {
-            combinedList.clear();
+            total.totalList.clear();
           }
         }
       }
     });
   }
 
-  updateTextFieldTask() {
-    setState(() {
+  updateTextFieldTask() async{
       if (taskKey.currentState.checkBoxParentTask.getIsCheckParent() == true) {
         taskController.text = Common.all;
+        isClearList = false;
         if (taskKey.currentState.isClickedOkTask) {
-          if (selectedIndex == 0) {
-            _getTotalList(convertedTimeStamp);
-          } else if (selectedIndex == 1 || selectedIndex == 4) {
-            _getPendingOrCompletedList(combinedList);
-          }
+          await _getTotalList(convertedTimeStamp);
+          setState(() {});
         }
       } else {
         List<String> displayList = taskKey.currentState.displayTextList;
-        List<Fnc_TaskScheduleSummaryResult> list =
+        List<Fnc_TaskScheduleSummaryResult> filteredTotalList =
             List<Fnc_TaskScheduleSummaryResult>();
-        list.clear();
+        List<Fnc_TaskScheduleSummaryResult> filteredPendingList =
+            List<Fnc_TaskScheduleSummaryResult>();
+        List<Fnc_TaskScheduleSummaryResult> filteredCompletedList =
+            List<Fnc_TaskScheduleSummaryResult>();
+
+        filteredTotalList.clear();
+        filteredPendingList.clear();
+        filteredCompletedList.clear();
+
         isFilteringTask = true;
+        isClearList = false;
+
         if (displayList.length != 0) {
+          await _getTotalList(convertedTimeStamp);
           String finalString = displayList.reduce((value, element) {
             return value + " ," + element;
           });
-          _getTotalList(convertedTimeStamp);
-          if (selectedIndex == 1 || selectedIndex == 4) {
-            _getPendingOrCompletedList(combinedList);
-          }
-          if (selectedIndex == 0) {
-            for (int i = 0; i < combinedList.length; i++) {
-              for (int j = 0; j < displayList.length; j++) {
-                if (combinedList[i].taskName == displayList[j]) {
-                    list.add(combinedList[i]);
-                }
-              }
-            }
-          } else if(selectedIndex == 1){
-            for (int i = 0; i < pendingList.length; i++) {
-              for (int j = 0; j < displayList.length; j++) {
-                if (pendingList[i].taskName == displayList[j]) {
-                  list.add(pendingList[i]);
-                }
-              }
-            }
-          } else if(selectedIndex == 4){
-            for (int i = 0; i < completedList.length; i++) {
-              for (int j = 0; j < displayList.length; j++) {
-                if (completedList[i].taskName == displayList[j]) {
-                  list.add(completedList[i]);
-                }
+          for (int i = 0; i < total.totalList.length; i++) {
+            for (int j = 0; j < displayList.length; j++) {
+              if (total.totalList[i].taskName == displayList[j]) {
+                filteredTotalList.add(total.totalList[i]);
               }
             }
           }
-          combinedList.clear();
-          pendingList.clear();
-          completedList.clear();
-          if (selectedIndex == 0) {
-            combinedList = list;
-          } else if (selectedIndex == 1) {
-            pendingList = list;
-          } else if (selectedIndex == 4) {
-            completedList = list;
+          for (int i = 0; i < pending.pendingList.length; i++) {
+            for (int j = 0; j < displayList.length; j++) {
+              if (pending.pendingList[i].taskName == displayList[j]) {
+                filteredPendingList.add(pending.pendingList[i]);
+              }
+            }
           }
+          for (int i = 0; i < completed.completedList.length; i++) {
+            for (int j = 0; j < displayList.length; j++) {
+              if (completed.completedList[i].taskName == displayList[j]) {
+                filteredCompletedList.add(completed.completedList[i]);
+              }
+            }
+          }
+          total.totalList.clear();
+          pending.pendingList.clear();
+          completed.completedList.clear();
+          total.setTotalList(filteredTotalList);
+          pending.setPendingList(filteredPendingList);
+          completed.setCompletedList(filteredCompletedList);
+
           taskController.text = finalString;
           _scrollToTop();
+          setState(() {});
         } else {
           if (taskKey.currentState.isClickedOkTask) {
-            if (selectedIndex == 0) {
-              combinedList.clear();
-            } else if (selectedIndex == 1) {
-              pendingList.clear();
-            } else if (selectedIndex == 4) {
-              completedList.clear();
-            }
+            total.totalList.clear();
+            pending.pendingList.clear();
+            completed.completedList.clear();
+
             isFilteringTask = false;
+            isClearList = true;
             taskController.text = "";
+            setState(() {});
           }
         }
       }
-    });
-  }
-
-  void _getPendingOrCompletedList(
-      List<Fnc_TaskScheduleSummaryResult> combinedList) {
-    List<Fnc_TaskScheduleSummaryResult> fullList =
-        List<Fnc_TaskScheduleSummaryResult>();
-    fullList.clear();
-    pendingList.clear();
-    completedList.clear();
-    fullList.addAll(combinedList);
-    for (int i = 0; i < fullList.length; i++) {
-      if (fullList[i].pending >= 1) {
-        pendingList.add(fullList[i]);
-        pendingList.sort((a, b) => a.planningDate.compareTo(b.planningDate));
-      } else if (fullList[i].pending == 0) {
-        completedList.add(fullList[i]);
-        completedList.sort((a, b) => a.planningDate.compareTo(b.planningDate));
-      }
-    }
-    _scrollToTop();
-    if (isFilteringTask != true) {
-      setState(() {});
-    }
   }
 
   void _scrollToTop() {
