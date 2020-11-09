@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:e_periodic/Common/Common.dart';
 import 'package:e_periodic/Model/TaskScheduleDetailList.dart';
 import 'package:e_periodic/Repo/ApiProvider.dart';
+import 'package:e_periodic/View/inspectionDetail.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -16,6 +17,7 @@ class TaskScheduleDetailPage extends StatefulWidget {
   final double endDate;
   final int tasksn;
   final int taskcgsn;
+  final String taskCategory;
 
   TaskScheduleDetailPage({
     Key key,
@@ -27,6 +29,7 @@ class TaskScheduleDetailPage extends StatefulWidget {
     this.endDate,
     this.tasksn,
     this.taskcgsn,
+    this.taskCategory,
   }) : super(key: key);
 
   @override
@@ -34,16 +37,22 @@ class TaskScheduleDetailPage extends StatefulWidget {
 }
 
 class _TaskScheduleDetailPageState extends State<TaskScheduleDetailPage> {
-  List<dynamic> taskScheduleDetailList = List<dynamic>();
-  List<dynamic> itemTaskScheduleDetailList = List<dynamic>();
+  List<dynamic> detailList = List<dynamic>();
   TextEditingController startTimeController = TextEditingController();
   TextEditingController endTimeController = TextEditingController();
+  bool isEquipment = false;
 
   @override
   void initState() {
     super.initState();
-    _getTaskScheduleDetailList();
-    _getItemTaskScheduleDetailList();
+    if (widget.taskCategory == Common.project) {
+      isEquipment = false;
+      _getTaskScheduleDetailList();
+    } else {
+      isEquipment = true;
+      _getItemTaskScheduleDetailList();
+    }
+    _displayDateText();
   }
 
   @override
@@ -66,8 +75,8 @@ class _TaskScheduleDetailPageState extends State<TaskScheduleDetailPage> {
       setState(() {
         if (response.statusCode == 200) {
           Map<String, dynamic> resultMap = json.decode(response.body);
-          List<dynamic> data = resultMap["fnc_TaskScheduleDetailListResult"];
-          taskScheduleDetailList = data;
+          List<dynamic> data = resultMap["fnc_TaskScheduleInspListResult"];
+          detailList = data;
         } else {
           throw Exception(response.statusCode);
         }
@@ -90,8 +99,8 @@ class _TaskScheduleDetailPageState extends State<TaskScheduleDetailPage> {
       setState(() {
         if (response.statusCode == 200) {
           Map<String, dynamic> resultMap = json.decode(response.body);
-          List<dynamic> data = resultMap["fnc_Item_Task_ScheduleDetailListResult"];
-          itemTaskScheduleDetailList = data;
+          List<dynamic> data = resultMap["fnc_Item_TaskScheduleInspListResult"];
+          detailList = data;
         } else {
           throw Exception(response.statusCode);
         }
@@ -100,6 +109,8 @@ class _TaskScheduleDetailPageState extends State<TaskScheduleDetailPage> {
       log('callTaskScheduleDetail : $error');
     });
   }
+
+  void _displayDateText() {}
 
   @override
   Widget build(BuildContext context) {
@@ -182,7 +193,8 @@ class _TaskScheduleDetailPageState extends State<TaskScheduleDetailPage> {
                             Expanded(
                               flex: 1,
                               child: Container(
-                                margin: const EdgeInsets.only(top: 10.0, left: 10.0),
+                                margin: const EdgeInsets.only(
+                                    top: 10.0, left: 10.0),
                                 child: Text(Common.startTime,
                                     style: Common.cardLabelTextStyle),
                               ),
@@ -190,7 +202,8 @@ class _TaskScheduleDetailPageState extends State<TaskScheduleDetailPage> {
                             Expanded(
                               flex: 1,
                               child: Container(
-                                margin: const EdgeInsets.only(top: 10.0, left: 10.0),
+                                margin: const EdgeInsets.only(
+                                    top: 10.0, left: 10.0),
                                 child: Text(Common.endTime,
                                     style: Common.cardLabelTextStyle),
                               ),
@@ -202,7 +215,8 @@ class _TaskScheduleDetailPageState extends State<TaskScheduleDetailPage> {
                             Expanded(
                               flex: 1,
                               child: Container(
-                                margin: const EdgeInsets.only(left: 10.0, right: 10.0),
+                                margin: const EdgeInsets.only(
+                                    left: 10.0, right: 10.0),
                                 child: TextFormField(
                                   controller: startTimeController,
                                   readOnly: true,
@@ -215,7 +229,7 @@ class _TaskScheduleDetailPageState extends State<TaskScheduleDetailPage> {
                               flex: 1,
                               child: Container(
                                 margin:
-                                const EdgeInsets.only(left: 10, right: 10),
+                                    const EdgeInsets.only(left: 10, right: 10),
                                 child: TextFormField(
                                   controller: endTimeController,
                                   readOnly: true,
@@ -237,13 +251,7 @@ class _TaskScheduleDetailPageState extends State<TaskScheduleDetailPage> {
                   height: 12,
                   color: Colors.grey,
                 ),
-                Expanded(
-                  child: ListView(
-                    children: [
-                      _buildDetailList(),
-                    ],
-                  ),
-                )
+                _buildListWidget(),
               ],
             )
           ],
@@ -252,9 +260,65 @@ class _TaskScheduleDetailPageState extends State<TaskScheduleDetailPage> {
     );
   }
 
-  Widget _buildDetailList() {
-    return Container(
-
+  Widget _buildListWidget() {
+    return Expanded(
+      child: ListView.builder(
+          itemCount: detailList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => InspectionDetailPage(
+                          location: detailList[index]["_location"],
+                          itemTaskInsPsn: detailList[index]["_itemtaskinspsn"],
+                          taskInsPsn: detailList[index]["_taskinspsn"],
+                          isEquipment: isEquipment,
+                        )));
+              },
+              child: Container(
+                margin: const EdgeInsets.only(
+                    left: 10, right: 10, top: 5.0, bottom: 5.0),
+                padding: const EdgeInsets.only(top: 5.0, bottom: 5.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 3,
+                      blurRadius: 5,
+                      offset: Offset(0, 3), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                        alignment: Alignment.centerLeft,
+                        margin: const EdgeInsets.only(left: 10),
+                        child: Text('${detailList[index]["_location"]}',
+                            style: Common.cardLabelTextStyle)),
+                    Row(
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(top: 5, left: 10),
+                          child: Text('${Common.inspection}',
+                              style: Common.detailCardLabelTextStyle),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(top: 5),
+                          child: Text(
+                            '${detailList[index]["_status"]}',
+                            style: Common.detailCardLabelTextStyle,
+                          ),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            );
+          }),
     );
   }
 }

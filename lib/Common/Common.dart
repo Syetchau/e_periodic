@@ -28,6 +28,11 @@ class Common{
   static const String noTask = "No task available.";
   static const String startTime = "Start Time";
   static const String endTime = "End Time";
+  static const String completedBy = "Completed By";
+  static const String inspectedBy = "InspectedBy By";
+  static const String result = "Result";
+  static const String project = "Project";
+  static const String inspection = "Inspection : ";
   static const String copyright = "Copyright @2020 EF Software Pte.Ltd.All Rights Reserved.";
   static const String baseURL = "http://efsoftware.dyndns.org:93/ePeriodicSchedule-skh-WS/";
 
@@ -47,13 +52,19 @@ class Common{
   static const String taskScheduleSummaryURL = "SVSchedule.svc/fnc_TaskScheduleSummary?";
 
   //TaskScheduleDetail
-  static const String taskScheduleDetailURL = "SVSchedule.svc/fnc_TaskScheduleDetailList?";
+  static const String taskScheduleDetailURL = "SVSchedule.svc/fnc_TaskScheduleInspList?";
+
+  //TaskInspectionDetail
+  static const String taskInspectionDetailURL = "SVSchedule.svc/fnc_TaskScheduleInspDetails?";
 
   //ItemSchedule
   static const String itemTaskScheduleSummaryURL = "SVItemSchedule.svc/fnc_Item_Task_ScheduleSummary?";
 
   //ItemTaskScheduleDetail
-  static const String itemTaskScheduleDetailURL = "SVItemSchedule.svc/fnc_Item_Task_ScheduleDetailList?";
+  static const String itemTaskScheduleDetailURL = "SVItemSchedule.svc/fnc_Item_TaskScheduleInspList?";
+
+  //ItemInspectionDetail
+  static const String itemInspectionDetailURL = "SVItemSchedule.svc/fnc_Item_TaskScheduleInspDetails?";
 
   static const List<String> choices = <String>[
     enquiry,signOut
@@ -69,6 +80,11 @@ class Common{
       color: Colors.black,
       fontSize: 16,
       fontWeight: FontWeight.bold,
+  );
+
+  static const TextStyle detailCardLabelTextStyle = TextStyle(
+    color: Colors.black,
+    fontSize: 16,
   );
 
   static const InputDecoration cardEditTextDeco = InputDecoration(

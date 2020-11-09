@@ -55,8 +55,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   DateTime selectedDate;
   double convertedTimeStamp;
   bool isLoading = true;
+  bool isFilteringArea = false;
   bool isFilteringTask = false;
-  bool isClearList = false;
+  bool isClearTaskList = false;
+  bool isClearAreaList = false;
   List<String> _options = [
     "ALL",
     "PENDING",
@@ -251,7 +253,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     isLoading = false;
     _scrollToTop();
-    if (isFilteringTask != true || isClearList != false) {
+    if (isFilteringTask != true ||
+        isFilteringArea != true ||
+        isClearTaskList != false ||
+        isClearAreaList != false) {
       setState(() {});
     }
   }
@@ -540,6 +545,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         endDate: list[index].scheduleDate.toDouble(),
                         tasksn: list[index].tasksn,
                         taskcgsn: list[index].taskcgsn,
+                        taskCategory: list[index].taskCategory,
                       )))
               .then((value) => _refresh());
         },
@@ -888,103 +894,154 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
-  updateTextFieldArea() {
-    setState(() {
-      if (areaKey.currentState.checkBoxParentArea.getIsCheckParent() == true) {
-        areaController.text = Common.all;
-        if (areaKey.currentState.isClickedOkArea) {
-          _getTotalList(convertedTimeStamp);
-        }
-      } else {
-        List<String> displayList = areaKey.currentState.displayTextList;
-        if (displayList.length != 0) {
-          String finalString = displayList.reduce((value, element) {
-            return value + " ," + element;
-          });
-          areaController.text = finalString;
-        } else {
-          areaController.text = "";
-          if (areaKey.currentState.isClickedOkArea) {
-            total.totalList.clear();
-          }
-        }
+  updateTextFieldArea() async {
+    if (areaKey.currentState.checkBoxParentArea.getIsCheckParent() == true) {
+      areaController.text = Common.all;
+      isClearAreaList = false;
+      if (areaKey.currentState.isClickedOkArea) {
+        await _getTotalList(convertedTimeStamp);
+        setState(() {});
       }
-    });
-  }
+    } else {
+      List<String> displayList = areaKey.currentState.displayTextList;
+      List<Fnc_TaskScheduleSummaryResult> filteredTotalList =
+          List<Fnc_TaskScheduleSummaryResult>();
+      List<Fnc_TaskScheduleSummaryResult> filteredPendingList =
+          List<Fnc_TaskScheduleSummaryResult>();
+      List<Fnc_TaskScheduleSummaryResult> filteredCompletedList =
+          List<Fnc_TaskScheduleSummaryResult>();
 
-  updateTextFieldTask() async{
-      if (taskKey.currentState.checkBoxParentTask.getIsCheckParent() == true) {
-        taskController.text = Common.all;
-        isClearList = false;
-        if (taskKey.currentState.isClickedOkTask) {
-          await _getTotalList(convertedTimeStamp);
-          setState(() {});
+      filteredTotalList.clear();
+      filteredPendingList.clear();
+      filteredCompletedList.clear();
+
+      isFilteringArea = true;
+      isClearAreaList = false;
+
+      if (displayList.length != 0) {
+        await _getTotalList(convertedTimeStamp);
+        String finalString = displayList.reduce((value, element) {
+          return value + " ," + element;
+        });
+        for (int i = 0; i < total.totalList.length; i++) {
+          for (int j = 0; j < displayList.length; j++) {
+            if (total.totalList[i].area == displayList[j]) {
+              filteredTotalList.add(total.totalList[i]);
+            }
+          }
         }
+        for (int i = 0; i < pending.pendingList.length; i++) {
+          for (int j = 0; j < displayList.length; j++) {
+            if (pending.pendingList[i].area == displayList[j]) {
+              filteredPendingList.add(pending.pendingList[i]);
+            }
+          }
+        }
+        for (int i = 0; i < completed.completedList.length; i++) {
+          for (int j = 0; j < displayList.length; j++) {
+            if (completed.completedList[i].area == displayList[j]) {
+              filteredCompletedList.add(completed.completedList[i]);
+            }
+          }
+        }
+        total.totalList.clear();
+        pending.pendingList.clear();
+        completed.completedList.clear();
+        total.setTotalList(filteredTotalList);
+        pending.setPendingList(filteredPendingList);
+        completed.setCompletedList(filteredCompletedList);
+
+        areaController.text = finalString;
+        _scrollToTop();
+        setState(() {});
       } else {
-        List<String> displayList = taskKey.currentState.displayTextList;
-        List<Fnc_TaskScheduleSummaryResult> filteredTotalList =
-            List<Fnc_TaskScheduleSummaryResult>();
-        List<Fnc_TaskScheduleSummaryResult> filteredPendingList =
-            List<Fnc_TaskScheduleSummaryResult>();
-        List<Fnc_TaskScheduleSummaryResult> filteredCompletedList =
-            List<Fnc_TaskScheduleSummaryResult>();
-
-        filteredTotalList.clear();
-        filteredPendingList.clear();
-        filteredCompletedList.clear();
-
-        isFilteringTask = true;
-        isClearList = false;
-
-        if (displayList.length != 0) {
-          await _getTotalList(convertedTimeStamp);
-          String finalString = displayList.reduce((value, element) {
-            return value + " ," + element;
-          });
-          for (int i = 0; i < total.totalList.length; i++) {
-            for (int j = 0; j < displayList.length; j++) {
-              if (total.totalList[i].taskName == displayList[j]) {
-                filteredTotalList.add(total.totalList[i]);
-              }
-            }
-          }
-          for (int i = 0; i < pending.pendingList.length; i++) {
-            for (int j = 0; j < displayList.length; j++) {
-              if (pending.pendingList[i].taskName == displayList[j]) {
-                filteredPendingList.add(pending.pendingList[i]);
-              }
-            }
-          }
-          for (int i = 0; i < completed.completedList.length; i++) {
-            for (int j = 0; j < displayList.length; j++) {
-              if (completed.completedList[i].taskName == displayList[j]) {
-                filteredCompletedList.add(completed.completedList[i]);
-              }
-            }
-          }
+        if (areaKey.currentState.isClickedOkArea) {
           total.totalList.clear();
           pending.pendingList.clear();
           completed.completedList.clear();
-          total.setTotalList(filteredTotalList);
-          pending.setPendingList(filteredPendingList);
-          completed.setCompletedList(filteredCompletedList);
 
-          taskController.text = finalString;
-          _scrollToTop();
+          isFilteringArea = false;
+          isClearAreaList = true;
+          areaController.text = "";
           setState(() {});
-        } else {
-          if (taskKey.currentState.isClickedOkTask) {
-            total.totalList.clear();
-            pending.pendingList.clear();
-            completed.completedList.clear();
-
-            isFilteringTask = false;
-            isClearList = true;
-            taskController.text = "";
-            setState(() {});
-          }
         }
       }
+    }
+  }
+
+  updateTextFieldTask() async {
+    if (taskKey.currentState.checkBoxParentTask.getIsCheckParent() == true) {
+      taskController.text = Common.all;
+      isClearTaskList = false;
+      if (taskKey.currentState.isClickedOkTask) {
+        await _getTotalList(convertedTimeStamp);
+        setState(() {});
+      }
+    } else {
+      List<String> displayList = taskKey.currentState.displayTextList;
+      List<Fnc_TaskScheduleSummaryResult> filteredTotalList =
+          List<Fnc_TaskScheduleSummaryResult>();
+      List<Fnc_TaskScheduleSummaryResult> filteredPendingList =
+          List<Fnc_TaskScheduleSummaryResult>();
+      List<Fnc_TaskScheduleSummaryResult> filteredCompletedList =
+          List<Fnc_TaskScheduleSummaryResult>();
+
+      filteredTotalList.clear();
+      filteredPendingList.clear();
+      filteredCompletedList.clear();
+
+      isFilteringTask = true;
+      isClearTaskList = false;
+
+      if (displayList.length != 0) {
+        await _getTotalList(convertedTimeStamp);
+        String finalString = displayList.reduce((value, element) {
+          return value + " ," + element;
+        });
+        for (int i = 0; i < total.totalList.length; i++) {
+          for (int j = 0; j < displayList.length; j++) {
+            if (total.totalList[i].taskName == displayList[j]) {
+              filteredTotalList.add(total.totalList[i]);
+            }
+          }
+        }
+        for (int i = 0; i < pending.pendingList.length; i++) {
+          for (int j = 0; j < displayList.length; j++) {
+            if (pending.pendingList[i].taskName == displayList[j]) {
+              filteredPendingList.add(pending.pendingList[i]);
+            }
+          }
+        }
+        for (int i = 0; i < completed.completedList.length; i++) {
+          for (int j = 0; j < displayList.length; j++) {
+            if (completed.completedList[i].taskName == displayList[j]) {
+              filteredCompletedList.add(completed.completedList[i]);
+            }
+          }
+        }
+        total.totalList.clear();
+        pending.pendingList.clear();
+        completed.completedList.clear();
+        total.setTotalList(filteredTotalList);
+        pending.setPendingList(filteredPendingList);
+        completed.setCompletedList(filteredCompletedList);
+
+        taskController.text = finalString;
+        _scrollToTop();
+        setState(() {});
+      } else {
+        if (taskKey.currentState.isClickedOkTask) {
+          total.totalList.clear();
+          pending.pendingList.clear();
+          completed.completedList.clear();
+
+          isFilteringTask = false;
+          isClearTaskList = true;
+          taskController.text = "";
+          setState(() {});
+        }
+      }
+    }
   }
 
   void _scrollToTop() {
