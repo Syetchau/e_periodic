@@ -90,6 +90,56 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
     });
   }
 
+  Future<String> _getTaskLocation() async {
+    return taskInspectionDetailList["_listTaskInspection"][0]["_location"];
+  }
+
+  Future<void> _getTaskStartTime() async {
+    return _convertStartTime(taskInspectionDetailList["_startDate"]);
+  }
+
+  Future<void> _getTaskEndTime() async {
+    return _convertEndTime(taskInspectionDetailList["_endDate"]);
+  }
+
+  Future<String> _getTaskCompletedBy() async {
+    return taskInspectionDetailList["_completedBy"];
+  }
+
+  Future<void> _getTaskInspectedBy() async {
+    return _setInspectionDetail(
+        taskInspectionDetailList["_inspectedBy"]);
+  }
+
+  Future<String> _getTaskStatus() async {
+    return taskInspectionDetailList["_listTaskInspection"][0]["_status"];
+  }
+
+  Future<String> _getItemTaskLocation() async {
+    return itemTaskInspectionDetailList["_listItemTaskInspection"][0]["_location"];
+  }
+
+  Future<void> _getItemTaskStartTime() async {
+    return _convertStartTime(itemTaskInspectionDetailList["_startDate"]);
+  }
+
+  Future<void> _getItemTaskEndTime() async {
+    return _convertEndTime(itemTaskInspectionDetailList["_endDate"]);
+  }
+
+  Future<String> _getItemTaskCompletedBy() async {
+    return itemTaskInspectionDetailList["_completedBy"];
+  }
+
+  Future<void> _getItemTaskInspectedBy() async {
+    return _setInspectionDetail(
+        itemTaskInspectionDetailList["_inspectedBy"]);
+  }
+
+  Future<String> _getItemTaskStatus() async {
+    return itemTaskInspectionDetailList["_listItemTaskInspection"][0]["_status"];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -158,16 +208,25 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            alignment: Alignment.centerLeft,
-            margin: const EdgeInsets.only(top: 10.0, left: 10.0),
-            child: Text(
-              '${taskInspectionDetailList["_listTaskInspection"][0]["_location"]}',
-              style: TextStyle(
-                  color: Colors.green,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
-            ),
+          FutureBuilder(
+            future: _getTaskLocation(),
+            builder: (context, snapshot){
+              if(snapshot.hasData){
+                return Container(
+                  alignment: Alignment.centerLeft,
+                  margin: const EdgeInsets.only(top: 10.0, left: 10.0),
+                  child: Text(
+                    '${snapshot.data}',
+                    style: TextStyle(
+                        color: Colors.green,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                );
+              } else{
+                return Container();
+              }
+            }
           ),
           Row(
             children: [
@@ -178,11 +237,19 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                   style: Common.cardLabelTextStyle,
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.only(top: 10.0, left: 5.0),
-                child:
-                    _convertStartTime(taskInspectionDetailList["_startDate"]),
-              )
+              FutureBuilder(
+                future: _getTaskStartTime(),
+                builder: (context, snapshot){
+                  if(snapshot.hasData){
+                    return Container(
+                      margin: const EdgeInsets.only(top: 10.0, left: 5.0),
+                      child: snapshot.data,
+                    );
+                  } else {
+                    return Container();
+                  }
+                }
+              ),
             ],
           ),
           Row(
@@ -194,10 +261,19 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                   style: Common.cardLabelTextStyle,
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.only(top: 10.0, left: 5.0),
-                child: _convertEndTime(taskInspectionDetailList["_endDate"]),
-              )
+             FutureBuilder(
+               future: _getTaskEndTime(),
+               builder: (context, snapshot){
+                 if(snapshot.hasData){
+                   return  Container(
+                     margin: const EdgeInsets.only(top: 10.0, left: 5.0),
+                     child: snapshot.data,
+                   );
+                 } else {
+                   return Container();
+                 }
+               }
+             )
             ],
           ),
           Row(
@@ -209,12 +285,21 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                   style: Common.cardLabelTextStyle,
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.only(top: 10.0, left: 5.0),
-                child: Text(
-                  '${taskInspectionDetailList["_completedBy"]}',
-                  style: Common.detailCardLabelTextStyle,
-                ),
+              FutureBuilder(
+                future: _getTaskCompletedBy(),
+                builder: (context, snapshot){
+                  if(snapshot.hasData){
+                    return Container(
+                      margin: const EdgeInsets.only(top: 10.0, left: 5.0),
+                      child: Text(
+                        snapshot.data,
+                        style: Common.detailCardLabelTextStyle,
+                      ),
+                    );
+                  } else {
+                    return Container();
+                  }
+                }
               )
             ],
           ),
@@ -227,10 +312,18 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                   style: Common.cardLabelTextStyle,
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.only(top: 10.0, left: 5.0),
-                child: _setInspectionDetail(
-                    taskInspectionDetailList["_inspectedBy"]),
+              FutureBuilder(
+                future: _getTaskInspectedBy(),
+                builder: (context, snapshot){
+                  if(snapshot.hasData){
+                    return Container(
+                      margin: const EdgeInsets.only(top: 10.0, left: 5.0),
+                      child: snapshot.data,
+                    );
+                  } else {
+                    return Container();
+                  }
+                }
               )
             ],
           ),
@@ -245,12 +338,21 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                     style: Common.cardLabelTextStyle,
                   ),
                 ),
-                Container(
-                  margin: const EdgeInsets.only(top: 10.0, left: 5.0),
-                  child: Text(
-                    '${taskInspectionDetailList["_listTaskInspection"][0]["_status"]}',
-                    style: Common.detailCardLabelTextStyle,
-                  ),
+                FutureBuilder(
+                  future: _getTaskStatus(),
+                  builder: (context, snapshot){
+                    if(snapshot.hasData){
+                      return Container(
+                        margin: const EdgeInsets.only(top: 10.0, left: 5.0),
+                        child: Text(
+                          snapshot.data,
+                          style: Common.detailCardLabelTextStyle,
+                        ),
+                      );
+                    } else {
+                      return Container();
+                    }
+                  }
                 )
               ],
             ),
@@ -279,16 +381,25 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            alignment: Alignment.centerLeft,
-            margin: const EdgeInsets.only(top: 10.0, left: 10.0),
-            child: Text(
-              '${itemTaskInspectionDetailList["_listItemTaskInspection"][0]["_location"]}',
-              style: TextStyle(
-                  color: Colors.green,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
-            ),
+          FutureBuilder(
+              future: _getItemTaskLocation(),
+              builder: (context, snapshot){
+                if(snapshot.hasData){
+                  return Container(
+                    alignment: Alignment.centerLeft,
+                    margin: const EdgeInsets.only(top: 10.0, left: 10.0),
+                    child: Text(
+                      '${snapshot.data}',
+                      style: TextStyle(
+                          color: Colors.green,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  );
+                } else{
+                  return Container();
+                }
+              }
           ),
           Row(
             children: [
@@ -299,11 +410,19 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                   style: Common.cardLabelTextStyle,
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.only(top: 10.0, left: 5.0),
-                child: _convertStartTime(
-                    itemTaskInspectionDetailList["_startDate"]),
-              )
+              FutureBuilder(
+                  future: _getItemTaskStartTime(),
+                  builder: (context, snapshot){
+                    if(snapshot.hasData){
+                      return Container(
+                        margin: const EdgeInsets.only(top: 10.0, left: 5.0),
+                        child: snapshot.data,
+                      );
+                    } else {
+                      return Container();
+                    }
+                  }
+              ),
             ],
           ),
           Row(
@@ -315,10 +434,18 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                   style: Common.cardLabelTextStyle,
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.only(top: 10.0, left: 5.0),
-                child:
-                    _convertEndTime(itemTaskInspectionDetailList["_endDate"]),
+              FutureBuilder(
+                  future: _getItemTaskEndTime(),
+                  builder: (context, snapshot){
+                    if(snapshot.hasData){
+                      return  Container(
+                        margin: const EdgeInsets.only(top: 10.0, left: 5.0),
+                        child: snapshot.data,
+                      );
+                    } else {
+                      return Container();
+                    }
+                  }
               )
             ],
           ),
@@ -331,12 +458,21 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                   style: Common.cardLabelTextStyle,
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.only(top: 10.0, left: 5.0),
-                child: Text(
-                  '${itemTaskInspectionDetailList["_completedBy"]}',
-                  style: Common.detailCardLabelTextStyle,
-                ),
+              FutureBuilder(
+                  future: _getItemTaskCompletedBy(),
+                  builder: (context, snapshot){
+                    if(snapshot.hasData){
+                      return Container(
+                        margin: const EdgeInsets.only(top: 10.0, left: 5.0),
+                        child: Text(
+                          snapshot.data,
+                          style: Common.detailCardLabelTextStyle,
+                        ),
+                      );
+                    } else {
+                      return Container();
+                    }
+                  }
               )
             ],
           ),
@@ -349,10 +485,18 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                   style: Common.cardLabelTextStyle,
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.only(top: 10.0, left: 5.0),
-                child: _setInspectionDetail(
-                    itemTaskInspectionDetailList["_inspectedBy"]),
+              FutureBuilder(
+                  future: _getItemTaskInspectedBy(),
+                  builder: (context, snapshot){
+                    if(snapshot.hasData){
+                      return Container(
+                        margin: const EdgeInsets.only(top: 10.0, left: 5.0),
+                        child: snapshot.data,
+                      );
+                    } else {
+                      return Container();
+                    }
+                  }
               )
             ],
           ),
@@ -367,12 +511,21 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                     style: Common.cardLabelTextStyle,
                   ),
                 ),
-                Container(
-                  margin: const EdgeInsets.only(top: 10.0, left: 5.0),
-                  child: Text(
-                    '${itemTaskInspectionDetailList["_listItemTaskInspection"][0]["_status"]}',
-                    style: Common.detailCardLabelTextStyle,
-                  ),
+                FutureBuilder(
+                    future: _getItemTaskStatus(),
+                    builder: (context, snapshot){
+                      if(snapshot.hasData){
+                        return Container(
+                          margin: const EdgeInsets.only(top: 10.0, left: 5.0),
+                          child: Text(
+                            snapshot.data,
+                            style: Common.detailCardLabelTextStyle,
+                          ),
+                        );
+                      } else {
+                        return Container();
+                      }
+                    }
                 )
               ],
             ),
