@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:typed_data';
 
 import 'package:e_periodic/Common/Common.dart';
 import 'package:e_periodic/Repo/ApiProvider.dart';
@@ -107,8 +108,7 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
   }
 
   Future<void> _getTaskInspectedBy() async {
-    return _setInspectionDetail(
-        taskInspectionDetailList["_inspectedBy"]);
+    return _setInspectionDetail(taskInspectionDetailList["_inspectedBy"]);
   }
 
   Future<String> _getTaskStatus() async {
@@ -116,7 +116,8 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
   }
 
   Future<String> _getItemTaskLocation() async {
-    return itemTaskInspectionDetailList["_listItemTaskInspection"][0]["_location"];
+    return itemTaskInspectionDetailList["_listItemTaskInspection"][0]
+        ["_location"];
   }
 
   Future<void> _getItemTaskStartTime() async {
@@ -132,12 +133,22 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
   }
 
   Future<void> _getItemTaskInspectedBy() async {
-    return _setInspectionDetail(
-        itemTaskInspectionDetailList["_inspectedBy"]);
+    return _setInspectionDetail(itemTaskInspectionDetailList["_inspectedBy"]);
   }
 
   Future<String> _getItemTaskStatus() async {
-    return itemTaskInspectionDetailList["_listItemTaskInspection"][0]["_status"];
+    return itemTaskInspectionDetailList["_listItemTaskInspection"][0]
+        ["_status"];
+  }
+
+  Future<void> _getTaskSignatureImage() async {
+    String signature = taskInspectionDetailList["_inspectedSignature"];
+    return dataFromBase64String(signature);
+  }
+
+  Future<void> _getItemTaskSignatureImage() async {
+    String signature = itemTaskInspectionDetailList["_inspectedSignature"];
+    return dataFromBase64String(signature);
   }
 
   @override
@@ -209,25 +220,24 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           FutureBuilder(
-            future: _getTaskLocation(),
-            builder: (context, snapshot){
-              if(snapshot.hasData){
-                return Container(
-                  alignment: Alignment.centerLeft,
-                  margin: const EdgeInsets.only(top: 10.0, left: 10.0),
-                  child: Text(
-                    '${snapshot.data}',
-                    style: TextStyle(
-                        color: Colors.green,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                );
-              } else{
-                return Container();
-              }
-            }
-          ),
+              future: _getTaskLocation(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Container(
+                    alignment: Alignment.centerLeft,
+                    margin: const EdgeInsets.only(top: 10.0, left: 10.0),
+                    child: Text(
+                      '${snapshot.data}',
+                      style: TextStyle(
+                          color: Colors.green,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  );
+                } else {
+                  return Container();
+                }
+              }),
           Row(
             children: [
               Container(
@@ -238,18 +248,17 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                 ),
               ),
               FutureBuilder(
-                future: _getTaskStartTime(),
-                builder: (context, snapshot){
-                  if(snapshot.hasData){
-                    return Container(
-                      margin: const EdgeInsets.only(top: 10.0, left: 5.0),
-                      child: snapshot.data,
-                    );
-                  } else {
-                    return Container();
-                  }
-                }
-              ),
+                  future: _getTaskStartTime(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Container(
+                        margin: const EdgeInsets.only(top: 10.0, left: 5.0),
+                        child: snapshot.data,
+                      );
+                    } else {
+                      return Container();
+                    }
+                  }),
             ],
           ),
           Row(
@@ -261,19 +270,18 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                   style: Common.cardLabelTextStyle,
                 ),
               ),
-             FutureBuilder(
-               future: _getTaskEndTime(),
-               builder: (context, snapshot){
-                 if(snapshot.hasData){
-                   return  Container(
-                     margin: const EdgeInsets.only(top: 10.0, left: 5.0),
-                     child: snapshot.data,
-                   );
-                 } else {
-                   return Container();
-                 }
-               }
-             )
+              FutureBuilder(
+                  future: _getTaskEndTime(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Container(
+                        margin: const EdgeInsets.only(top: 10.0, left: 5.0),
+                        child: snapshot.data,
+                      );
+                    } else {
+                      return Container();
+                    }
+                  })
             ],
           ),
           Row(
@@ -286,21 +294,20 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                 ),
               ),
               FutureBuilder(
-                future: _getTaskCompletedBy(),
-                builder: (context, snapshot){
-                  if(snapshot.hasData){
-                    return Container(
-                      margin: const EdgeInsets.only(top: 10.0, left: 5.0),
-                      child: Text(
-                        snapshot.data,
-                        style: Common.detailCardLabelTextStyle,
-                      ),
-                    );
-                  } else {
-                    return Container();
-                  }
-                }
-              )
+                  future: _getTaskCompletedBy(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Container(
+                        margin: const EdgeInsets.only(top: 10.0, left: 5.0),
+                        child: Text(
+                          snapshot.data,
+                          style: Common.detailCardLabelTextStyle,
+                        ),
+                      );
+                    } else {
+                      return Container();
+                    }
+                  })
             ],
           ),
           Row(
@@ -313,35 +320,32 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                 ),
               ),
               FutureBuilder(
-                future: _getTaskInspectedBy(),
-                builder: (context, snapshot){
-                  if(snapshot.hasData){
-                    return Container(
-                      margin: const EdgeInsets.only(top: 10.0, left: 5.0),
-                      child: snapshot.data,
-                    );
-                  } else {
-                    return Container();
-                  }
-                }
-              )
+                  future: _getTaskInspectedBy(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Container(
+                        margin: const EdgeInsets.only(top: 10.0, left: 5.0),
+                        child: snapshot.data,
+                      );
+                    } else {
+                      return Container();
+                    }
+                  })
             ],
           ),
-          Container(
-            margin: const EdgeInsets.only(bottom: 15),
-            child: Row(
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 10.0, left: 10.0),
-                  child: Text(
-                    '${Common.result} :',
-                    style: Common.cardLabelTextStyle,
-                  ),
+          Row(
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 10.0, left: 10.0),
+                child: Text(
+                  '${Common.result} :',
+                  style: Common.cardLabelTextStyle,
                 ),
-                FutureBuilder(
+              ),
+              FutureBuilder(
                   future: _getTaskStatus(),
-                  builder: (context, snapshot){
-                    if(snapshot.hasData){
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
                       return Container(
                         margin: const EdgeInsets.only(top: 10.0, left: 5.0),
                         child: Text(
@@ -352,11 +356,32 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                     } else {
                       return Container();
                     }
-                  }
-                )
-              ],
+                  })
+            ],
+          ),
+          Container(
+            alignment: Alignment.centerLeft,
+            margin: const EdgeInsets.only(top: 10.0, left: 10.0),
+            child: Text(
+              '${Common.inspectionSignature}',
+              style: Common.cardLabelTextStyle,
             ),
           ),
+          Container(
+            margin: const EdgeInsets.only(bottom: 15),
+            child: FutureBuilder(
+                future: _getTaskSignatureImage(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Container(
+                        height: 200,
+                        width: double.infinity,
+                        child: Image.memory(snapshot.data));
+                  } else {
+                    return Container();
+                  }
+                }),
+          )
         ],
       ),
     );
@@ -383,8 +408,8 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
         children: [
           FutureBuilder(
               future: _getItemTaskLocation(),
-              builder: (context, snapshot){
-                if(snapshot.hasData){
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
                   return Container(
                     alignment: Alignment.centerLeft,
                     margin: const EdgeInsets.only(top: 10.0, left: 10.0),
@@ -396,11 +421,10 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                           fontWeight: FontWeight.bold),
                     ),
                   );
-                } else{
+                } else {
                   return Container();
                 }
-              }
-          ),
+              }),
           Row(
             children: [
               Container(
@@ -412,8 +436,8 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
               ),
               FutureBuilder(
                   future: _getItemTaskStartTime(),
-                  builder: (context, snapshot){
-                    if(snapshot.hasData){
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
                       return Container(
                         margin: const EdgeInsets.only(top: 10.0, left: 5.0),
                         child: snapshot.data,
@@ -421,8 +445,7 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                     } else {
                       return Container();
                     }
-                  }
-              ),
+                  }),
             ],
           ),
           Row(
@@ -436,17 +459,16 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
               ),
               FutureBuilder(
                   future: _getItemTaskEndTime(),
-                  builder: (context, snapshot){
-                    if(snapshot.hasData){
-                      return  Container(
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Container(
                         margin: const EdgeInsets.only(top: 10.0, left: 5.0),
                         child: snapshot.data,
                       );
                     } else {
                       return Container();
                     }
-                  }
-              )
+                  })
             ],
           ),
           Row(
@@ -460,8 +482,8 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
               ),
               FutureBuilder(
                   future: _getItemTaskCompletedBy(),
-                  builder: (context, snapshot){
-                    if(snapshot.hasData){
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
                       return Container(
                         margin: const EdgeInsets.only(top: 10.0, left: 5.0),
                         child: Text(
@@ -472,8 +494,7 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                     } else {
                       return Container();
                     }
-                  }
-              )
+                  })
             ],
           ),
           Row(
@@ -487,8 +508,8 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
               ),
               FutureBuilder(
                   future: _getItemTaskInspectedBy(),
-                  builder: (context, snapshot){
-                    if(snapshot.hasData){
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
                       return Container(
                         margin: const EdgeInsets.only(top: 10.0, left: 5.0),
                         child: snapshot.data,
@@ -496,40 +517,58 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
                     } else {
                       return Container();
                     }
-                  }
-              )
+                  })
+            ],
+          ),
+          Row(
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 10.0, left: 10.0),
+                child: Text(
+                  '${Common.result} :',
+                  style: Common.cardLabelTextStyle,
+                ),
+              ),
+              FutureBuilder(
+                  future: _getItemTaskStatus(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Container(
+                        margin: const EdgeInsets.only(top: 10.0, left: 5.0),
+                        child: Text(
+                          snapshot.data,
+                          style: Common.detailCardLabelTextStyle,
+                        ),
+                      );
+                    } else {
+                      return Container();
+                    }
+                  })
             ],
           ),
           Container(
-            margin: const EdgeInsets.only(bottom: 15),
-            child: Row(
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 10.0, left: 10.0),
-                  child: Text(
-                    '${Common.result} :',
-                    style: Common.cardLabelTextStyle,
-                  ),
-                ),
-                FutureBuilder(
-                    future: _getItemTaskStatus(),
-                    builder: (context, snapshot){
-                      if(snapshot.hasData){
-                        return Container(
-                          margin: const EdgeInsets.only(top: 10.0, left: 5.0),
-                          child: Text(
-                            snapshot.data,
-                            style: Common.detailCardLabelTextStyle,
-                          ),
-                        );
-                      } else {
-                        return Container();
-                      }
-                    }
-                )
-              ],
+            alignment: Alignment.centerLeft,
+            margin: const EdgeInsets.only(top: 10.0, left: 10.0),
+            child: Text(
+              '${Common.inspectionSignature}',
+              style: Common.cardLabelTextStyle,
             ),
           ),
+          Container(
+            margin: const EdgeInsets.only(bottom: 15),
+            child: FutureBuilder(
+                future: _getItemTaskSignatureImage(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Container(
+                        height: 200,
+                        width: double.infinity,
+                        child: Image.memory(snapshot.data));
+                  } else {
+                    return Container();
+                  }
+                }),
+          )
         ],
       ),
     );
@@ -570,5 +609,9 @@ class _InspectionDetailPageState extends State<InspectionDetailPage> {
       '$inspection',
       style: Common.detailCardLabelTextStyle,
     );
+  }
+
+  Uint8List dataFromBase64String(String base64String) {
+    return base64Decode(base64String);
   }
 }

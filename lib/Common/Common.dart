@@ -33,6 +33,7 @@ class Common{
   static const String result = "Result";
   static const String project = "Project";
   static const String inspection = "Inspection : ";
+  static const String inspectionSignature = "Inspection Signature :";
   static const String copyright = "Copyright @2020 EF Software Pte.Ltd.All Rights Reserved.";
   static const String baseURL = "http://efsoftware.dyndns.org:93/ePeriodicSchedule-skh-WS/";
 
